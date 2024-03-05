@@ -1,0 +1,19 @@
+FROM registry.access.redhat.com/ubi9/python-39:latest
+
+LABEL name="jupyter-nb" \
+    summary="Jupyter Notebook image"
+
+WORKDIR /opt/app-root/bin
+
+COPY requirments.txt start-notebook.sh ./
+# Install Python dependencies from Pipfile.lock file
+RUN echo "Installing softwares and packages" && \
+    pip install -r requirments.txt 
+
+# Fix permissions to support pip in Openshift environments
+RUN chmod -R g+w /opt/app-root/lib/python3.9/site-packages && \
+      fix-permissions /opt/app-root -P
+
+WORKDIR /opt/app-root/src
+
+ENTRYPOINT ["start-notebook.sh"]

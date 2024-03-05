@@ -1,0 +1,3 @@
+# JupyterLab packages
+jupyterlab~=3.6.5
+jupyter-server~=2.7.3

@@ -1,0 +1,16 @@
+ARG BASE_IMAGE
+FROM $BASE_IMAGE
+
+LABEL name="jupyter-nb" \
+    summary="Jupyter Notebook image"
+
+WORKDIR /opt/app-root/src
+
+COPY . ./
+# Install Python dependencies from Pipfile.lock file
+RUN echo "Installing softwares and packages" && \
+    if [-f requirments.txt]; then pip install -r requirments.txt; fi
+    
+# Fix permissions to support pip in Openshift environments
+RUN chmod -R g+w /opt/app-root/lib/python3.9/site-packages && \
+    fix-permissions /opt/app-root -P
