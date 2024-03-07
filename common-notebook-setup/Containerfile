@@ -1,0 +1,19 @@
+ARG BASE_IMAGE=quay.io/umohnani8/nb-base
+ARG NOTEBOOK_FOLDER
+ARG NOTEBOOK_NAME
+
+FROM $BASE_IMAGE
+
+RUN echo "Building image with notebook ${NOTEBOOK_NAME} in folder ${NOTEBOOK_FOLDER}"
+LABEL name="${NOTEBOOK_NAME}" \
+    summary="Jupyter Notebook image"
+
+WORKDIR /opt/app-root/src
+COPY . ./
+# Install Python dependencies from requirements.txt file
+RUN echo "Installing softwares and packages" && \
+    if [ -f "requirements.txt" ]; then pip install -r requirements.txt; fi
+    
+# Fix permissions to support pip in Openshift environments
+RUN chmod -R g+w /opt/app-root/lib/python3.9/site-packages && \
+    fix-permissions /opt/app-root -P

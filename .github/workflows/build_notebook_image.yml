@@ -1,0 +1,49 @@
+name: Build_Notebook_Image
+on:
+  workflow_dispatch:
+    inputs:
+      folder:
+        description: 'Triggering Notebook folder'
+        required: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Process inputs
+        id: process_inputs
+        env:
+          FOLDER: ${{ github.event.inputs.folder }}
+        run: | 
+          echo "FOLDER=${FOLDER}" >> $GITHUB_OUTPUT
+          echo "NAME=${FOLDER#notebooks/}" >> $GITHUB_OUTPUT
+
+      - name: Build notebook image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: quay.io/umohnani8/${{ steps.process_inputs.outputs.NAME }}
+          tags: latest ${{ github.sha }}
+          containerfiles: ./common-notebook-setup/Containerfile
+          context: ${{ steps.process_inputs.outputs.FOLDER }}
+          build-args: |
+            NOTEBOOK_FOLDER=${{ steps.process_inputs.outputs.FOLDER }}
+            NOTEBOOK_NAME=${{ steps.process_inputs.outputs.NAME }}
+          oci: true
+      - name: Push to Quay
+        uses: redhat-actions/push-to-registry@v1
+        with:
+          registry: quay.io/umohnani8
+          image: ${{ steps.process_inputs.outputs.NAME }}
+          username: ${{ vars.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+          tag: latest
+      - name: Push to Quay
+        uses: redhat-actions/push-to-registry@v1
+        with:
+          registry: quay.io/umohnani8
+          image: ${{ steps.process_inputs.outputs.NAME }}
+          username: ${{ vars.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+          tag: ${{ github.sha }}
+  

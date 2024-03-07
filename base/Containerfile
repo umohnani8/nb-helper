@@ -5,10 +5,11 @@ LABEL name="jupyter-nb" \
 
 WORKDIR /opt/app-root/bin
 
-COPY requirments.txt start-notebook.sh ./
+COPY requirements.txt start-notebook.sh ./
+
 # Install Python dependencies from Pipfile.lock file
 RUN echo "Installing softwares and packages" && \
-    pip install -r requirments.txt 
+    pip install -r requirements.txt 
 
 # Fix permissions to support pip in Openshift environments
 RUN chmod -R g+w /opt/app-root/lib/python3.9/site-packages && \
